@@ -1,6 +1,8 @@
 package main
 
-import "github.com/tomknobel/ip2country/cmd/api"
+import (
+	"github.com/tomknobel/ip2country/cmd/api"
+)
 
 func main() {
 

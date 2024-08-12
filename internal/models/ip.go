@@ -1,7 +1,7 @@
 package models
 
 type Ip struct {
-	Adders  string
-	Country string
-	City    string
+	Adders  string `json:"adders"`
+	Country string `json:"country"`
+	City    string `json:"city"`
 }

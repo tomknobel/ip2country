@@ -7,11 +7,7 @@ import (
 )
 
 func InitIp2CountryRouter(r chi.Router, ipDb db.Db) {
-	err := ipDb.Connect()
-	if err != nil {
-		return
-	}
-	defer ipDb.Close()
+
 	ic := controllers.NewIpController(ipDb)
 
 	r.Get("/find-country", ic.GetCountryByIp)

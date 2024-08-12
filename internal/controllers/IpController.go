@@ -22,10 +22,7 @@ func (ic *ipController) GetCountryByIp(w http.ResponseWriter, r *http.Request) {
 	ip := r.URL.Query().Get("ip")
 	country, err := ic.db.Find(ip)
 	if err != nil {
-		utils.JsonResponse(w, ErrorResponse{
-			error: err.Error(),
-		})
-
+		panic(err)
 	}
 	utils.JsonResponse(w, country)
 

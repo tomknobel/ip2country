@@ -34,7 +34,11 @@ func (app *Application) newRouts(middlewares ...func(http.Handler) http.Handler)
 	r.Use(chiMiddl.Logger)
 	r.Use(middlewares...)
 	ipDb := db.DbFactory(app.cfg.dbType, app.cfg.dbCfg)
-
+	err := ipDb.Connect()
+	if err != nil {
+		panic(err)
+	}
+	defer ipDb.Close()
 	r.Route("/v1", func(v1 chi.Router) {
 		routes.InitIp2CountryRouter(v1, ipDb)
 	})
@@ -47,7 +51,7 @@ func (app *Application) Run() {
 		app.cfg.limiter.windowSize,
 		app.Logger,
 	)
-	r := app.newRouts(rateLimiterMiddleware.RateLimiterByIp, chiMiddl.Logger)
+	r := app.newRouts(rateLimiterMiddleware.RateLimiterByIp, chiMiddl.Logger, middleware.PanicRecoveryMiddleware)
 	app.Logger.Infof("Starting the API server at port %s", app.cfg.port)
 	addr := fmt.Sprintf(":%s", app.cfg.port)
 	app.Logger.Fatal(http.ListenAndServe(addr, r))

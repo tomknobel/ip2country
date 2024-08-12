@@ -28,11 +28,15 @@ func initConfig() config {
 		panic(err)
 	}
 
+	if err != nil {
+		panic(err)
+	}
 	return config{
 		limiter: limiterCfg{
 			rateLimit:  rateLimit,
 			windowSize: windowSize,
 		},
+
 		dbCfg: db.DbConfig{
 			ConnectionString: utils.GetEnv("DB_CONNECTION_STRING", ""),
 		},
