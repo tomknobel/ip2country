@@ -1,9 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	chiMiddl "github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	"github.com/tomknobel/ip2country/internal/db"
+	"github.com/tomknobel/ip2country/internal/routes"
 	"github.com/tomknobel/ip2country/pkg/middleware"
 	"net/http"
 
@@ -11,7 +14,7 @@ import (
 )
 
 type Application struct {
-	cfg    Config
+	cfg    config
 	Logger *zap.SugaredLogger
 }
 
@@ -25,22 +28,27 @@ func NewApplication() *Application {
 		Logger: zap.NewExample().Sugar(),
 	}
 }
-func (app *Application) Run() {
-	rateLimiterMiddleware := middleware.NewRateLimitMiddleware(
-		app.cfg.rateLimiter.Rate,
-		app.cfg.rateLimiter.Window,
-		app.Logger,
-	)
 
+func (app *Application) newRouts(middlewares ...func(http.Handler) http.Handler) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(chiMiddl.Logger)
-	r.Use(rateLimiterMiddleware.RateLimiterByIp)
+	r.Use(middlewares...)
+	ipDb := db.DbFactory(app.cfg.dbType, app.cfg.dbCfg)
 
-	r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
+	r.Route("/v1", func(v1 chi.Router) {
+		routes.InitIp2CountryRouter(v1, ipDb)
 	})
-	app.Logger.Infof("Starting the API server at", app.cfg.port)
-	app.Logger.Fatal(http.ListenAndServe(":3000", r))
-	//adrr := fmt.Sprintf(":%s", &app.cfg)
-	//return http.ListenAndServe(adrr, r)
+	return r
+}
+
+func (app *Application) Run() {
+	rateLimiterMiddleware := middleware.NewRateLimitMiddleware(
+		app.cfg.limiter.rateLimit,
+		app.cfg.limiter.windowSize,
+		app.Logger,
+	)
+	r := app.newRouts(rateLimiterMiddleware.RateLimiterByIp, chiMiddl.Logger)
+	app.Logger.Infof("Starting the API server at port %s", app.cfg.port)
+	addr := fmt.Sprintf(":%s", app.cfg.port)
+	app.Logger.Fatal(http.ListenAndServe(addr, r))
 }

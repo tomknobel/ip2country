@@ -10,8 +10,12 @@ import (
 	"time"
 )
 
+type config struct {
+	rateLimit  int64
+	windowSize time.Duration
+}
 type rateLimitMiddleware struct {
-	cfg    rate.Config
+	cfg    config
 	logger *zap.SugaredLogger
 }
 
@@ -22,17 +26,15 @@ type message struct {
 
 func NewRateLimitMiddleware(rateLimit int64, window time.Duration, logger *zap.SugaredLogger) *rateLimitMiddleware {
 	return &rateLimitMiddleware{
-		cfg: rate.Config{
-			Rate:   rateLimit,
-			Window: window,
+		cfg: config{
+			rateLimit:  rateLimit,
+			windowSize: window,
 		},
 		logger: logger,
 	}
 
 }
 func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
-	rm.logger.Info("innn0")
-
 	type client struct {
 		limiter  rate.ILimiter
 		lastSeen time.Time
@@ -41,6 +43,7 @@ func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
 		mu      sync.Mutex
 		clients = make(map[string]*client)
 	)
+	rm.logger.Info("init clients")
 	go func() {
 		for {
 			time.Sleep(time.Minute)
@@ -56,10 +59,7 @@ func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
 	}()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract the IP address from the request.
-		rm.logger.Info("innn")
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
-		rm.logger.Info(ip)
-
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -67,7 +67,7 @@ func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
 		// Lock the mutex to protect this section from race conditions.
 		mu.Lock()
 		if _, found := clients[ip]; !found {
-			clients[ip] = &client{limiter: rate.NewLimiter(rm.cfg.Window, rm.cfg.Rate)}
+			clients[ip] = &client{limiter: rate.NewLimiter(rm.cfg.windowSize, rm.cfg.rateLimit)}
 		}
 		clients[ip].lastSeen = time.Now()
 		if !clients[ip].limiter.Allow() {
