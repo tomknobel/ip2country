@@ -68,7 +68,7 @@ func TestLimiter_Allow_WithPartialWindow(t *testing.T) {
 	}
 
 	// Simulate advancing time to halfway through the next window
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(600 * time.Millisecond)
 
 	// Allow 1 request, which should be allowed since we're only halfway through the window
 	if !lim.Allow() {

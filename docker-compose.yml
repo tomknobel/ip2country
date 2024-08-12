@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  test:
+    build:
+      context: .
+      target: test
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: [ "/bin/sh", "-c" ]
   web:
     build: .
     ports:

@@ -7,6 +7,9 @@ RUN go mod download
 COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+FROM builder AS test
+# Run tests
+RUN go test ./... -v
 
 FROM scratch
 WORKDIR /root/
