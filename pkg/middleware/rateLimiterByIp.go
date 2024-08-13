@@ -47,7 +47,6 @@ func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
 	go func() {
 		for {
 			time.Sleep(time.Minute)
-			// Lock the mutex to protect this section from race conditions.
 			mu.Lock()
 			for ip, client := range clients {
 				if time.Since(client.lastSeen) > 3*time.Minute {
@@ -58,13 +57,11 @@ func (rm *rateLimitMiddleware) RateLimiterByIp(next http.Handler) http.Handler {
 		}
 	}()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Extract the IP address from the request.
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		// Lock the mutex to protect this section from race conditions.
 		mu.Lock()
 		if _, found := clients[ip]; !found {
 			clients[ip] = &client{limiter: rate.NewLimiter(rm.cfg.windowSize, rm.cfg.rateLimit)}

@@ -6,7 +6,7 @@ import (
 )
 
 func TestLimiter_Allow(t *testing.T) {
-	lim := NewLimiter(1*time.Second, 3) // 3 events per second
+	lim := NewLimiter(1*time.Second, 3)
 
 	// Test allowing 3 requests within 1 second
 	if !lim.Allow() {
@@ -26,7 +26,7 @@ func TestLimiter_Allow(t *testing.T) {
 }
 
 func TestLimiter_Allow_WithTimeAdvance(t *testing.T) {
-	lim := NewLimiter(1*time.Second, 3) // 3 events per second
+	lim := NewLimiter(1*time.Second, 3)
 
 	// Allow 3 requests in the first second
 	if !lim.Allow() {
@@ -57,7 +57,7 @@ func TestLimiter_Allow_WithTimeAdvance(t *testing.T) {
 }
 
 func TestLimiter_Allow_WithPartialWindow(t *testing.T) {
-	lim := NewLimiter(1*time.Second, 3) // 3 events per second
+	lim := NewLimiter(1*time.Second, 3)
 
 	// Allow 2 requests in the first second
 	if !lim.Allow() {
@@ -67,7 +67,6 @@ func TestLimiter_Allow_WithPartialWindow(t *testing.T) {
 		t.Errorf("expected true, got false")
 	}
 
-	// Simulate advancing time to halfway through the next window
 	time.Sleep(600 * time.Millisecond)
 
 	// Allow 1 request, which should be allowed since we're only halfway through the window
@@ -84,7 +83,6 @@ func TestLimiter_Allow_WithPartialWindow(t *testing.T) {
 func TestLimiter_Allow_ExactLimit(t *testing.T) {
 	lim := NewLimiter(1*time.Second, 3) // 3 events per second
 
-	// Allow exactly 3 requests
 	if !lim.Allow() {
 		t.Errorf("expected true, got false")
 	}

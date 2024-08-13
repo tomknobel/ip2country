@@ -6,21 +6,21 @@ import (
 	"net/http"
 )
 
-type ipController struct {
+type countryController struct {
 	db db.Db
 }
 type ErrorResponse struct {
 	error string
 }
 
-func NewIpController(db db.Db) *ipController {
-	return &ipController{
+func NewCountryController(db db.Db) *countryController {
+	return &countryController{
 		db,
 	}
 }
-func (ic *ipController) GetCountryByIp(w http.ResponseWriter, r *http.Request) {
+func (c *countryController) GetCountryByIp(w http.ResponseWriter, r *http.Request) {
 	ip := r.URL.Query().Get("ip")
-	country, err := ic.db.Find(ip)
+	country, err := c.db.Find(ip)
 	if err != nil {
 		panic(err)
 	}

@@ -8,7 +8,7 @@ import (
 
 func InitIp2CountryRouter(r chi.Router, ipDb db.Db) {
 
-	ic := controllers.NewIpController(ipDb)
+	ic := controllers.NewCountryController(ipDb)
 
 	r.Get("/find-country", ic.GetCountryByIp)
 }

@@ -38,7 +38,6 @@ func (csv *csvDb) Find(ip string) (*models.Country, error) {
 		return nil, err
 	}
 
-	// Iterate through the records
 	for {
 		record, err := reader.Read()
 		if err != nil {
