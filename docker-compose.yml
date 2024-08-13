@@ -8,7 +8,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    entrypoint: [ "/bin/sh", "-c" ]
+
   web:
     build: .
     ports:

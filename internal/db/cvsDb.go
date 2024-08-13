@@ -29,7 +29,7 @@ func (csv *csvDb) Connect() error {
 func (csv *csvDb) Close() error {
 	return csv.file.Close()
 }
-func (csv *csvDb) Find(ip string) (*models.Ip, error) {
+func (csv *csvDb) Find(ip string) (*models.Country, error) {
 	csv.Connect()
 	defer csv.Close()
 	reader := csv_utils.NewReader(csv.file)
@@ -47,17 +47,15 @@ func (csv *csvDb) Find(ip string) (*models.Ip, error) {
 				break
 			}
 			logger.Errorf("Error reading record:%v", err)
-			return &models.Ip{}, err
+			return &models.Country{}, err
 		}
-		logger.Info(record)
-		// Assume ID is the first column
+
 		if record[0] == ip {
-			return &models.Ip{
-				Adders:  ip,
+			return &models.Country{
 				Country: record[1],
-				City:    record[2],
+				City:    record[3],
 			}, nil
 		}
 	}
-	return &models.Ip{}, nil
+	return &models.Country{}, nil
 }

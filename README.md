@@ -20,7 +20,7 @@ can run
 
 docker-compose build
 # Run the service
-docker-compose up
+docker-compose up web
 ```
 the [Dockerfile](./Dockerfile) is multi-stage Dockerfile and can be run directly by docker commend
 
@@ -29,7 +29,7 @@ the [Dockerfile](./Dockerfile) is multi-stage Dockerfile and can be run directly
 unit test can be run 
 ```bash
 # By docker / docker-compose
-docker-compose run --rm test
+docker-compose up test
 
 # locally 
 go test ./... -v
